@@ -1,0 +1,375 @@
+@import "tailwindcss";
+
+:root {
+  --background: #070b1a;
+  --foreground: #e5e7eb;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: "Inter", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: #22c55e44;
+  color: #e5e7eb;
+}
+
+a {
+  color: inherit;
+}
+
+/* BEM Classes */
+.app {
+  @apply min-h-screen bg-slate-950 text-white;
+}
+
+.app__layout {
+  @apply grid gap-6 lg:grid-cols-3;
+}
+
+.app__bg {
+  @apply absolute inset-0 bg-gradient-to-br from-emerald-900/20 via-indigo-900/20 to-amber-900/20;
+}
+
+.app__container {
+  @apply relative mx-auto max-w-6xl px-6 py-10 space-y-8;
+}
+
+/* Header */
+.header {
+  @apply flex flex-col gap-4 rounded-2xl border border-white/20 bg-white/10 p-6 shadow-lg;
+}
+
+.header__content {
+  @apply flex flex-wrap items-center justify-between gap-3;
+}
+
+.header__title-section {
+  @apply flex flex-col;
+}
+
+.header__subtitle {
+  @apply text-sm uppercase tracking-wider text-emerald-200;
+}
+
+.header__title {
+  @apply text-3xl font-semibold text-white;
+}
+
+.header__description {
+  @apply text-slate-200;
+}
+
+.header__actions {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+/* Stat Pill */
+.stat-pill {
+  @apply rounded-xl bg-gradient-to-br px-4 py-2 text-slate-900 shadow-md;
+}
+
+.stat-pill__label {
+  @apply text-xs font-semibold uppercase tracking-wide;
+}
+
+.stat-pill__value {
+  @apply text-lg font-bold;
+}
+
+.stat-pill--emerald {
+  @apply from-emerald-500 to-emerald-400;
+}
+
+.stat-pill--amber {
+  @apply from-amber-500 to-amber-400;
+}
+
+.stat-pill--cyan {
+  @apply from-cyan-500 to-cyan-400;
+}
+
+.stat-pill--rose {
+  @apply from-rose-500 to-rose-400;
+}
+
+/* Button */
+.btn {
+  @apply rounded-lg px-4 py-2 text-sm font-semibold transition;
+}
+
+.btn--primary {
+  @apply bg-indigo-500 text-white hover:bg-indigo-400;
+}
+
+.btn--success {
+  @apply bg-emerald-500 text-white hover:bg-emerald-400;
+}
+
+.btn--submit {
+  @apply rounded-xl bg-indigo-500 px-6 py-3 text-sm font-semibold text-white shadow-md hover:bg-indigo-400 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn--close {
+  @apply rounded-full border border-white/20 bg-white/10 px-2 text-sm text-slate-200 hover:bg-white/20;
+}
+
+.btn--remove {
+  @apply rounded-full border border-white/20 px-2 text-xs text-slate-200 hover:bg-white/10;
+}
+
+/* Sidebar */
+.sidebar {
+  @apply space-y-4 rounded-2xl border border-white/20 bg-slate-900 p-4 shadow-lg;
+}
+
+.sidebar__title {
+  @apply text-sm font-medium text-slate-100;
+}
+
+.sidebar__section {
+  @apply mt-6 space-y-3 rounded-xl border border-white/20 bg-white/10 p-4;
+}
+
+.sidebar__section-title {
+  @apply text-sm font-semibold text-slate-100;
+}
+
+/* Node Library */
+.node-library {
+  @apply grid grid-cols-2 gap-3;
+}
+
+.node-card {
+  @apply rounded-xl border border-white/20 bg-gradient-to-br px-3 py-3 text-left hover:border-white/30 hover:-translate-y-1;
+}
+
+.node-card__icon {
+  @apply text-lg;
+}
+
+.node-card__title {
+  @apply text-sm font-semibold text-white;
+}
+
+.node-card__description {
+  @apply mt-1 text-xs text-slate-200;
+}
+
+.node-card__header {
+  @apply flex items-center gap-2;
+}
+
+/* Node Card Component */
+.node {
+  @apply relative overflow-hidden rounded-xl border border-white/10 bg-slate-900 p-4 shadow-lg;
+}
+
+.node__glow {
+  @apply absolute inset-0 opacity-30;
+}
+
+.node__glow-inner {
+  @apply absolute inset-0 blur-2xl;
+}
+
+.node__header {
+  @apply relative flex items-start justify-between gap-3;
+}
+
+.node__info {
+  @apply flex items-center gap-3;
+}
+
+.node__icon {
+  @apply flex h-10 w-10 items-center justify-center rounded-lg text-lg font-semibold text-slate-900;
+}
+
+.node__content {
+  @apply flex flex-col;
+}
+
+.node__title-row {
+  @apply flex items-center gap-2;
+}
+
+.node__title {
+  @apply text-lg font-semibold text-white;
+}
+
+.node__badge {
+  @apply rounded-full border border-white/20 bg-white/10 px-2 py-1 text-xs text-slate-200;
+}
+
+.node__description {
+  @apply text-sm text-slate-300;
+}
+
+.node__hint {
+  @apply mt-3 rounded-lg border border-white/10 bg-white/10 px-3 py-2 text-xs text-slate-200;
+}
+
+.node__text-area {
+  @apply mt-4;
+}
+
+.node__textarea {
+  @apply w-full resize-none rounded-lg border border-white/20 bg-slate-950 px-3 py-3 text-sm text-slate-100 outline-none focus:ring-2 focus:ring-amber-400/50;
+}
+
+.node__variables {
+  @apply mt-2 text-xs text-amber-200;
+}
+
+.node__handles {
+  @apply relative mt-4 flex items-start justify-between gap-6;
+}
+
+.node__handles-left {
+  @apply flex flex-col gap-2;
+}
+
+.node__handles-right {
+  @apply flex flex-col items-end gap-2;
+}
+
+/* Handle */
+.handle {
+  @apply flex items-center gap-2 text-xs text-slate-200;
+}
+
+.handle__dot {
+  @apply inline-flex h-3 w-3 rounded-full border border-white/30;
+}
+
+.handle__label {
+  @apply rounded-full border border-white/20 bg-white/10 px-2 py-1;
+}
+
+/* Canvas */
+.canvas {
+  @apply space-y-4 lg:col-span-2;
+}
+
+.canvas__container {
+  @apply rounded-2xl border border-white/20 bg-slate-900 p-4 shadow-lg;
+}
+
+.canvas__title {
+  @apply mb-4 text-sm font-semibold text-slate-100;
+}
+
+.canvas__grid {
+  @apply grid gap-4 md:grid-cols-2;
+}
+
+.canvas__empty {
+  @apply col-span-full rounded-xl border border-dashed border-white/20 bg-white/10 px-6 py-10 text-center text-slate-300;
+}
+
+/* Edge List */
+.edge-list {
+  @apply space-y-2 rounded-xl border border-white/20 bg-white/10 p-4;
+}
+
+.edge-list__header {
+  @apply flex items-center justify-between;
+}
+
+.edge-list__title {
+  @apply text-sm font-semibold text-slate-100;
+}
+
+.edge-list__count {
+  @apply text-xs text-slate-300;
+}
+
+.edge-list__items {
+  @apply space-y-2;
+}
+
+.edge-item {
+  @apply flex items-center justify-between rounded-lg border border-white/20 bg-slate-950 px-3 py-2 text-xs text-slate-200;
+}
+
+.edge-item__text {
+  @apply text-slate-200;
+}
+
+/* Form */
+.form-group {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.form-label {
+  @apply text-xs text-slate-300;
+}
+
+.form-select {
+  @apply mt-1 w-full rounded-lg border border-white/20 bg-slate-950 px-2 py-2 text-xs text-slate-100 outline-none focus:ring-2 focus:ring-emerald-400/50;
+}
+
+/* Modal */
+.modal {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/60;
+}
+
+.modal__overlay {
+  @apply relative mx-4 w-full max-w-md rounded-2xl border border-white/20 bg-slate-900 p-6 shadow-xl;
+}
+
+.modal__close {
+  @apply absolute right-4 top-4 rounded-full border border-white/20 bg-white/10 px-2 text-sm text-slate-200 hover:bg-white/20;
+}
+
+.modal__title {
+  @apply mb-4 text-xl font-semibold;
+}
+
+.modal__title--error {
+  @apply text-rose-400;
+}
+
+.modal__title--success {
+  @apply text-emerald-400;
+}
+
+.modal__content {
+  @apply space-y-3;
+}
+
+.modal__row {
+  @apply flex items-center justify-between rounded-lg border border-white/20 bg-white/10 px-4 py-3;
+}
+
+.modal__label {
+  @apply text-slate-300;
+}
+
+.modal__value {
+  @apply text-lg font-semibold text-white;
+}
+
+.modal__badge {
+  @apply rounded-full px-3 py-1 text-sm font-semibold;
+}
+
+.modal__badge--success {
+  @apply bg-emerald-500/30 text-emerald-300;
+}
+
+.modal__badge--error {
+  @apply bg-rose-500/30 text-rose-300;
+}
+
+.modal__error-text {
+  @apply text-slate-200;
+}
