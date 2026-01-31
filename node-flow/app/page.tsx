@@ -1,207 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
-type HandleSide = "left" | "right";
-
-type Handle = {
-  id: string;
-  label: string;
-  side: HandleSide;
-  tone?: string;
-};
-
-type NodeTemplate = {
-  type: string;
-  title: string;
-  icon: string;
-  accent: string;
-  description: string;
-  inputs: Handle[];
-  outputs: Handle[];
-  bodyHint?: string;
-};
-
-type NodeInstance = {
-  id: string;
-  type: string;
-  text?: string;
-};
-
-type Edge = {
-  id: string;
-  source: string;
-  target: string;
-};
-
-const NODE_LIBRARY: NodeTemplate[] = [
-  {
-    type: "input",
-    title: "User Input",
-    icon: "🟢",
-    accent: "#22c55e",
-    description: "Pipeline entry. Produces user-provided data.",
-    inputs: [],
-    outputs: [{ id: "out", label: "value", side: "right" }],
-  },
-  {
-    type: "output",
-    title: "Output",
-    icon: "🏁",
-    accent: "#f97316",
-    description: "Pipeline sink. Collects final results.",
-    inputs: [{ id: "in", label: "result", side: "left" }],
-    outputs: [],
-  },
-  {
-    type: "llm",
-    title: "LLM",
-    icon: "🤖",
-    accent: "#6366f1",
-    description: "Large language model call with prompt + params.",
-    inputs: [
-      { id: "prompt", label: "prompt", side: "left" },
-      { id: "context", label: "context", side: "left", tone: "muted" },
-    ],
-    outputs: [{ id: "response", label: "text", side: "right" }],
-    bodyHint: "Model: gpt-4o-mini • Temperature: 0.7",
-  },
-  {
-    type: "text",
-    title: "Text",
-    icon: "📝",
-    accent: "#f59e0b",
-    description: "Freeform text. Use {{variable}} to add inputs.",
-    inputs: [{ id: "in", label: "text in", side: "left" }],
-    outputs: [{ id: "out", label: "text out", side: "right" }],
-  },
-  // Five additional nodes to showcase the abstraction
-  {
-    type: "http",
-    title: "HTTP Request",
-    icon: "🌐",
-    accent: "#06b6d4",
-    description: "Fetch data from an external API.",
-    inputs: [
-      { id: "url", label: "url", side: "left" },
-      { id: "body", label: "body", side: "left", tone: "muted" },
-    ],
-    outputs: [
-      { id: "json", label: "json", side: "right" },
-      { id: "status", label: "status", side: "right", tone: "muted" },
-    ],
-    bodyHint: "GET / POST with headers & query params",
-  },
-  {
-    type: "math",
-    title: "Math",
-    icon: "➗",
-    accent: "#8b5cf6",
-    description: "Lightweight arithmetic & expressions.",
-    inputs: [
-      { id: "a", label: "a", side: "left" },
-      { id: "b", label: "b", side: "left" },
-    ],
-    outputs: [{ id: "result", label: "result", side: "right" }],
-    bodyHint: "Supports +, -, *, /, ^",
-  },
-  {
-    type: "branch",
-    title: "Branch",
-    icon: "🪢",
-    accent: "#14b8a6",
-    description: "Route based on a condition.",
-    inputs: [{ id: "condition", label: "if", side: "left" }],
-    outputs: [
-      { id: "true", label: "true", side: "right" },
-      { id: "false", label: "false", side: "right" },
-    ],
-    bodyHint: "Truthy check or custom predicate",
-  },
-  {
-    type: "vector",
-    title: "Vector Store",
-    icon: "🧠",
-    accent: "#e11d48",
-    description: "Embed & search semantic vectors.",
-    inputs: [
-      { id: "docs", label: "docs", side: "left" },
-      { id: "query", label: "query", side: "left", tone: "muted" },
-    ],
-    outputs: [{ id: "matches", label: "matches", side: "right" }],
-    bodyHint: "Top-k similarity with filters",
-  },
-  {
-    type: "tool",
-    title: "Tool Executor",
-    icon: "🛠️",
-    accent: "#0ea5e9",
-    description: "Invoke custom tools/scripts.",
-    inputs: [{ id: "args", label: "args", side: "left" }],
-    outputs: [
-      { id: "result", label: "result", side: "right" },
-      { id: "logs", label: "logs", side: "right", tone: "muted" },
-    ],
-    bodyHint: "Shell-safe, sandboxed execution",
-  },
-];
-
-const TEMPLATE_MAP = NODE_LIBRARY.reduce<Record<string, NodeTemplate>>(
-  (acc, tpl) => {
-    acc[tpl.type] = tpl;
-    return acc;
-  },
-  {}
-);
-
-const extractVariables = (text: string) => {
-  const matches = Array.from(
-    text.matchAll(/\{\{\s*([A-Za-z_$][\w$]*)\s*\}\}/g)
-  );
-  return Array.from(new Set(matches.map((m) => m[1])));
-};
-
-const isDag = (nodes: NodeInstance[], edges: Edge[]) => {
-  const indegree = new Map<string, number>();
-  const graph = new Map<string, string[]>();
-
-  nodes.forEach((n) => {
-    indegree.set(n.id, 0);
-    graph.set(n.id, []);
-  });
-
-  edges.forEach(({ source, target }) => {
-    if (!graph.has(source)) return;
-    graph.get(source)!.push(target);
-    indegree.set(target, (indegree.get(target) ?? 0) + 1);
-  });
-
-  const queue = Array.from(indegree.entries())
-    .filter(([, deg]) => deg === 0)
-    .map(([id]) => id);
-
-  let visited = 0;
-  while (queue.length) {
-    const curr = queue.shift()!;
-    visited += 1;
-    for (const nxt of graph.get(curr) ?? []) {
-      indegree.set(nxt, (indegree.get(nxt) ?? 0) - 1);
-      if ((indegree.get(nxt) ?? 0) === 0) queue.push(nxt);
-    }
-  }
-  return visited === nodes.length;
-};
-
-const makeId = (prefix: string) =>
-  `${prefix}-${Math.random().toString(36).slice(2, 7)}`;
-
-const paletteAccents = [
-  "from-purple-500/30 to-pink-500/20",
-  "from-pink-500/30 to-rose-500/20",
-  "from-cyan-500/30 to-blue-500/20",
-  "from-violet-500/30 to-purple-500/20",
-  "from-fuchsia-500/30 to-pink-500/20",
-];
+import type { Handle, NodeTemplate, NodeInstance, Edge } from "../src/nodes";
+import {
+  NODE_LIBRARY,
+  TEMPLATE_MAP,
+  paletteAccents,
+  extractVariables,
+  isDag,
+  makeId,
+} from "../src/nodes";
+import { submitPipeline } from "../src/submit";
 
 const NodeCard = ({
   node,
@@ -218,6 +27,7 @@ const NodeCard = ({
   const textValue = node.text ?? "";
   const variables = isText ? extractVariables(textValue) : [];
 
+  // resize text node based on content
   const textMetrics = useMemo(() => {
     if (!isText)
       return { width: undefined, minHeight: undefined, areaHeight: undefined };
@@ -303,7 +113,7 @@ const NodeCard = ({
           />
           {variables.length > 0 && (
             <p className="node__variables">
-              Detected handles: {variables.join(", ")}
+              vars: {variables.join(", ")}
             </p>
           )}
         </div>
@@ -330,27 +140,12 @@ const NodeCard = ({
   );
 };
 
-const HandlePill = ({
-  handle,
-  accent,
-  align = "left",
-}: {
-  handle: Handle;
-  accent: string;
-  align?: "left" | "right";
-}) => {
-  const dot = (
-    <span
-      className="handle__dot"
-      style={{ backgroundColor: `${accent}dd` }}
-    />
-  );
+const HandlePill = ({ handle, accent, align = "left" }: { handle: Handle; accent: string; align?: "left" | "right" }) => {
+  const dot = <span className="handle__dot" style={{ backgroundColor: `${accent}dd` }} />;
   return (
     <div className="handle">
       {align === "left" ? dot : null}
-      <span className="handle__label">
-        {handle.label}
-      </span>
+      <span className="handle__label">{handle.label}</span>
       {align === "right" ? dot : null}
     </div>
   );
@@ -366,6 +161,7 @@ export default function Home() {
     { id: "e-1", source: "input-1", target: "text-1" },
     { id: "e-2", source: "text-1", target: "llm-1" },
   ]);
+  // console.log("nodes", nodes.length, "edges", edges.length); // debug
 
   const [edgeDraft, setEdgeDraft] = useState({ source: "", target: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -376,25 +172,23 @@ export default function Home() {
     is_dag?: boolean;
     error?: string;
   }>({ show: false });
-  const stats = useMemo(
-    () => ({
-      numNodes: nodes.length,
-      numEdges: edges.length,
-      isDag: isDag(nodes, edges),
-    }),
-    [nodes, edges]
-  );
+  const stats = useMemo(() => {
+    const isDagResult = isDag(nodes, edges);
+    return { numNodes: nodes.length, numEdges: edges.length, isDag: isDagResult };
+  }, [nodes, edges]);
 
   const addNode = (type: string) => {
     const template = TEMPLATE_MAP[type];
     if (!template) return;
     const newId = makeId(type);
     setNodes((prev) => [...prev, { id: newId, type }]);
+    console.log("added node", type, newId);
   };
 
   const removeNode = (id: string) => {
     setNodes((prev) => prev.filter((n) => n.id !== id));
     setEdges((prev) => prev.filter((e) => e.source !== id && e.target !== id));
+    console.log("removed node", id);
   };
 
   const handleTextChange = (id: string, text: string) => {
@@ -409,6 +203,7 @@ export default function Home() {
     const id = makeId("edge");
     setEdges((prev) => [...prev, { id, source, target }]);
     setEdgeDraft({ source: "", target: "" });
+    console.log("edge added", source, "->", target);
   };
 
   const removeEdge = (id: string) => {
@@ -418,24 +213,7 @@ export default function Home() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const response = await fetch("http://localhost:8000/pipelines/parse", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nodes: nodes,
-          edges: edges,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      // Display alert with the response
+      const data = await submitPipeline(nodes, edges);
       setAlertData({
         show: true,
         num_nodes: data.num_nodes,
@@ -443,13 +221,13 @@ export default function Home() {
         is_dag: data.is_dag,
       });
     } catch (error) {
-      console.error("Error submitting pipeline:", error);
+      console.error("submit failed", error);
       setAlertData({
         show: true,
         error:
           error instanceof Error
             ? error.message
-            : "Unknown error occurred. Make sure the backend server is running on http://localhost:8000",
+            : "Unknown error. Is the backend running on :8000?",
       });
     } finally {
       setIsSubmitting(false);
@@ -580,7 +358,7 @@ export default function Home() {
               <div className="canvas__grid">
                 {nodes.map((node) => {
                   const template = TEMPLATE_MAP[node.type];
-                  if (!template) return null;
+                  if (!template) return null; // skip unknown type
                   return (
                     <NodeCard
                       key={node.id}
@@ -607,7 +385,7 @@ export default function Home() {
         <div className="modal">
           <div className="modal__overlay">
             <button
-              onClick={() => setAlertData({ show: false })}
+              onClick={() => { setAlertData({ show: false }); console.log("modal closed"); }}
               className="modal__close"
             >
               ✕
@@ -658,6 +436,7 @@ export default function Home() {
             >
               Close
             </button>
+            {/* todo: could add "submit again" here */}
           </div>
         </div>
       )}
@@ -665,35 +444,17 @@ export default function Home() {
   );
 }
 
-const Select = ({
-  label,
-  value,
-  onChange,
-  options,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  options: NodeInstance[];
-}) => {
-  return (
-    <label className="form-label">
-      {label}
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="form-select"
-      >
-        <option value="">Select</option>
-        {options.map((o) => (
-          <option key={o.id} value={o.id}>
-            {o.id} ({o.type})
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-};
+const Select = ({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: NodeInstance[] }) => (
+  <label className="form-label">
+    {label}
+    <select value={value} onChange={(e) => onChange(e.target.value)} className="form-select">
+      <option value="">Select</option>
+      {options.map((o) => (
+        <option key={o.id} value={o.id}>{o.id} ({o.type})</option>
+      ))}
+    </select>
+  </label>
+);
 
 const StatPill = ({
   label,

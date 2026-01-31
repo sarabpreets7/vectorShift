@@ -38,11 +38,7 @@ class PipelineRequest(BaseModel):
 
 
 def is_dag(nodes: List[Node], edges: List[Edge]) -> bool:
-    """
-    Check if the pipeline forms a directed acyclic graph (DAG).
-    Uses topological sort (Kahn's algorithm).
-    """
-    # Build adjacency list and calculate indegree
+    # topsort - if we can process all nodes without cycles, it's a DAG
     node_ids = {node.id for node in nodes}
     graph: Dict[str, List[str]] = {node_id: [] for node_id in node_ids}
     indegree: Dict[str, int] = {node_id: 0 for node_id in node_ids}
@@ -68,18 +64,15 @@ def is_dag(nodes: List[Node], edges: List[Edge]) -> bool:
             if indegree[neighbor] == 0:
                 queue.append(neighbor)
 
-    # If we visited all nodes, it's a DAG (no cycles)
     return visited_count == len(node_ids)
 
 
 @app.post("/pipelines/parse")
 async def parse_pipeline(pipeline: PipelineRequest):
-    """
-    Parse a pipeline and return statistics.
-    """
     num_nodes = len(pipeline.nodes)
     num_edges = len(pipeline.edges)
     is_dag_result = is_dag(pipeline.nodes, pipeline.edges)
+    print(f"parse: nodes={num_nodes} edges={num_edges} is_dag={is_dag_result}")
 
     return {
         "num_nodes": num_nodes,
