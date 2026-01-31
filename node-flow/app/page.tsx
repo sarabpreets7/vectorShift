@@ -196,11 +196,11 @@ const makeId = (prefix: string) =>
   `${prefix}-${Math.random().toString(36).slice(2, 7)}`;
 
 const paletteAccents = [
-  "from-emerald-500/30 to-emerald-400/20",
-  "from-indigo-500/30 to-indigo-400/20",
-  "from-amber-500/30 to-amber-400/20",
-  "from-cyan-500/30 to-cyan-400/20",
-  "from-rose-500/30 to-rose-400/20",
+  "from-purple-500/30 to-pink-500/20",
+  "from-pink-500/30 to-rose-500/20",
+  "from-cyan-500/30 to-blue-500/20",
+  "from-violet-500/30 to-purple-500/20",
+  "from-fuchsia-500/30 to-pink-500/20",
 ];
 
 const NodeCard = ({
@@ -458,16 +458,15 @@ export default function Home() {
 
   return (
     <div className="app">
-      <div className="app__bg" />
       <div className="app__container">
         <header className="header">
           <div className="header__content">
             <div className="header__title-section">
               <p className="header__subtitle">
-                VectorShift-style playground
+                Pipeline Builder
               </p>
               <h1 className="header__title">
-                Node abstraction demo
+                FlowForge Studio
               </h1>
               <p className="header__description">
                 Add nodes, wire edges, and watch Text nodes grow + auto-handle

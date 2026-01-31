@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 app = FastAPI()
 
@@ -23,7 +23,7 @@ app.add_middleware(
 class Node(BaseModel):
     id: str
     type: str
-    text: str | None = None
+    text: Optional[str] = None
 
 
 class Edge(BaseModel):
