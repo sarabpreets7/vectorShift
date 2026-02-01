@@ -313,11 +313,15 @@ a {
 }
 
 .node__glow {
-  @apply absolute inset-0 opacity-30;
+  @apply absolute inset-0 opacity-30 pointer-events-none;
 }
 
 .node__glow-inner {
-  @apply absolute inset-0 blur-2xl;
+  @apply absolute inset-0 blur-2xl pointer-events-none;
+}
+
+.node__body {
+  @apply relative z-10;
 }
 
 .node__header {
@@ -357,7 +361,8 @@ a {
 }
 
 .node__text-area {
-  @apply mt-4;
+  @apply mt-4 relative z-10;
+  pointer-events: auto;
 }
 
 .node__textarea {
@@ -366,6 +371,7 @@ a {
   border: 1px solid rgba(168, 85, 247, 0.3);
   color: #f0f0f5;
   transition: all 0.3s ease;
+  pointer-events: auto;
 }
 
 .node__textarea:focus {

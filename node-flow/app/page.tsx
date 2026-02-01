@@ -68,6 +68,7 @@ const NodeCard = ({
         />
       </div>
 
+      <div className="node__body">
       <div className="node__header">
         <div className="node__info">
           <div
@@ -135,6 +136,7 @@ const NodeCard = ({
             />
           ))}
         </div>
+      </div>
       </div>
     </div>
   );
